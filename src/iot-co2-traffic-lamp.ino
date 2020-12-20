@@ -14,6 +14,8 @@
 
 unsigned long duration_1, duration_2;
 
+char eventData[64];
+
 // setup() runs once, when the device is first turned on.
 void setup() {
     // transmission rate to serial monitor 
@@ -52,18 +54,33 @@ void loop() {
     // print to serial
     Serial.print("CO2 ppm: " + String(co2_ppm) + "; ");
 
-    Serial.print("corrected CO2 ppm: " + String(co2_corrected) + "; ");
+    Serial.println("corrected CO2 ppm: " + String(co2_corrected) + "; ");
 
-    Serial.print("DURATION_1: " + String(duration_1) + "; ");
+    publishMesaruement(co2_corrected);
 
-    Serial.print("DURATION_2: " + String(duration_2) + "; ");
+    // Serial.print("DURATION_1: " + String(duration_1) + "; ");
 
-    Serial.print("HIGH: " + String(pulse_high) + "; ");
+    // Serial.print("DURATION_2: " + String(duration_2) + "; ");
 
-    Serial.print("HIGH_2: " + String(pulse_high_2) + "; ");
+    // Serial.print("HIGH: " + String(pulse_high) + "; ");
 
-    Serial.println("LOW: " + String(pulse_low) + "; ");
+    // Serial.print("HIGH_2: " + String(pulse_high_2) + "; ");
+
+    // Serial.println("LOW: " + String(pulse_low) + "; ");
 
   }
-  delay(2500);
+  delay(5000);
+}
+
+void publishMesaruement(const int co2_ppm) {
+
+  int timestamp = Time.now();
+
+  JSONBufferWriter writer(eventData, sizeof(eventData));
+  writer.beginObject();
+      writer.name("value").value(co2_ppm);
+      writer.name("timestamp").value(timestamp);
+  writer.endObject();
+
+  Particle.publish("co2_concentration", eventData, PRIVATE);
 }
